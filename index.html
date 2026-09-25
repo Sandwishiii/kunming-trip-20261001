@@ -1564,9 +1564,10 @@ function popHTML(name,c,meta,extra,book,am){
 const pm={}; // name -> marker
 const nameOf={}; // marker -> name（重画带序号图标用）
 function foodLbl(n){ return shortName(n); }
+function hasLbl(p){ return p.c==='food'||p.c==='gift'||p.c==='attr'; } // 美食/伴手礼/景点钉显示名称标签
 POINTS.forEach(p=>{
   const isFood=p.c==='food'&&p.meal;
-  const mk=L.marker([p.lat,p.lng],{icon:pinIcon(iconOf(p), p.c==='food'?foodLbl(p.n):(p.c==='gift'?shortName(p.n):''), false, isFood?MEALLBL[p.meal]:''),title:p.n})
+  const mk=L.marker([p.lat,p.lng],{icon:pinIcon(iconOf(p), hasLbl(p)?foodLbl(p.n):'', false, isFood?MEALLBL[p.meal]:''),title:p.n})
     .bindPopup(popHTML(p.n,p.c,(isFood?MEALTAG[p.meal]+' ':'')+(p.m||'')+(p.x?' ｜ '+p.x:''),p.est?'<b>坐标为示意</b>，点下方按钮搜店名定位':'',p.book,amapLink(p.lat,p.lng,p.n,p.est)),{maxWidth:280});
   mk.__p=p; pm[p.n]=mk; nameOf[L.Util.stamp(mk)]=p.n;
 });
@@ -1647,7 +1648,7 @@ function unnumber(){
   numbered.forEach(mk=>{
     const p=mk.__p; if(!p) return;
     const isFood=p.c==='food'&&p.meal;
-    mk.setIcon(pinIcon(iconOf(p), p.c==='food'||p.c==='gift'?shortName(p.n):'', false, isFood?MEALLBL[p.meal]:''));
+    mk.setIcon(pinIcon(iconOf(p), hasLbl(p)?shortName(p.n):'', false, isFood?MEALLBL[p.meal]:''));
     mk.setPopupContent(popHTML(p.n,p.c,(isFood?MEALTAG[p.meal]+' ':'')+(p.m||'')+(p.x?' ｜ '+p.x:''),p.est?'<b>坐标为示意</b>，点下方按钮搜店名定位':'',p.book,amapLink(p.lat,p.lng,p.n,p.est)));
   });
   numbered=[];
@@ -1658,7 +1659,7 @@ function numPins(m){
     const p=mk.__p;
     if(p){
       const isFood=p.c==='food'&&p.meal;
-      mk.setIcon(pinIcon(iconOf(p), p.c==='food'||p.c==='gift'?shortName(p.n):'', false, isFood?MEALLBL[p.meal]:'', m[n]));
+      mk.setIcon(pinIcon(iconOf(p), hasLbl(p)?shortName(p.n):'', false, isFood?MEALLBL[p.meal]:'', m[n]));
       mk.setPopupContent(popHTML('第 '+m[n]+' 站 · '+p.n,p.c,(p.meal?MEALTAG[p.meal]+' ':'')+(p.m||'')+(p.x?' ｜ '+p.x:''),p.est?'<b>坐标为示意</b>，点下方按钮搜店名定位':'',p.book,amapLink(p.lat,p.lng,p.n,p.est)));
       numbered.push(mk);
     } else {
