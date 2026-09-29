@@ -926,6 +926,17 @@ body{overflow:hidden;background:var(--bg)}
 .tiptip.on{display:block}
 .tiptip b{color:#1c2733}
 .tiptip-h{font-size:10.5px;color:#8a99a8;margin-bottom:5px;letter-spacing:.3px}
+.wxupd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:2px 4px 9px;padding:7px 9px;background:#f1f6fd;border:1px solid #c9dceb;border-radius:8px;font-size:11.5px;color:#2b5a92}
+.wxupd b{color:#12355c}
+#wxbtn{border:1px solid #2b6cb0;background:#2b6cb0;color:#fff;border-radius:13px;padding:4px 11px;font-size:11.8px;font-family:inherit;cursor:pointer;flex:none}
+#wxbtn:active{opacity:.7}
+#wxbtn:disabled{opacity:.55}
+#wxsum{flex:1;min-width:140px;line-height:1.6}
+#wxsum .warn{display:block;margin-top:3px;color:#6d4b17}
+.wxlive{margin:4px 2px 5px;padding:5px 8px;border-radius:0 6px 6px 0;background:#eef5fc;border-left:2px solid #7ea9d8;font-size:11.3px;color:#22517f;line-height:1.6}
+.wxlive b{color:#12355c}
+.wxlive i{display:block;margin-top:2px;color:#7a5a1d;font-style:normal}
+.wxlive.gone{background:#fdf6ec;border-left-color:#e0b483;color:#6d4b17}
 .flashday{animation:fla 1.1s ease}
 @keyframes fla{0%{background:#fff6d8;border-radius:8px}100%{background:transparent}}
 @media (max-height:560px){.tiptip{max-height:44vh}}
@@ -1040,6 +1051,10 @@ body{overflow:hidden;background:var(--bg)}
     <div id="seqtip" style="display:none;position:absolute;z-index:800;top:52px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid #cbd5e1;border-radius:14px;padding:3px 12px;font-size:11.5px;color:#33475b;box-shadow:0 2px 8px rgba(0,0,0,.12);pointer-events:none;white-space:normal;max-width:88vw;text-align:center">钉上蓝圈数字 = 当天游览顺序（按行程时间），虚线为走线参考</div>
     <div id="mapmain">
       <div id="sidebar">
+        <div class="wxupd" id="wxupd">
+          <button type="button" id="wxbtn">🔄 一键更新天气</button>
+          <span id="wxsum">点这里拉实时预报，逐日数字会更新在每天的天气条下面。<b>现在的数字仍是 2026-09-29 20:00 中央气象台 / 中国天气网口径</b>。</span>
+        </div>
         <div id="sideDays"></div>
         <div class="sec"><h2 class="hotel">🏨 住宿 · 机场两晚（10/1 与 10/4）✅ 已订：维也纳空港店</h2>
           <div class="card" style="margin:0;padding:9px 11px"><b>维也纳国际酒店（昆明长水机场空港店）</b> · 官渡区长水航城 51 号地块 S106 号 · <b>¥244 / 晚</b>（10/1、10/4 两晚同店）· 高德 4.7 分 · 2021 装修 · 距 T1 约 3 公里。<b>选它的原因</b>：锦江系连锁标准房，两晚同店、10/4 回去熟门熟路；10/5 早 05:45 送机正好赶 08:00 航班。<br><span class="small">待办：下单后打电话确认<b>凌晨接机</b>（10/1 约 00:30 取完行李出到达口）与 <b>05:45 送机</b>（10/5）——机场酒店唯一硬指标就是这两趟车。</span> <a href="https://router.feizhu.com/multi/webview?url=https%3A%2F%2Frouter.feizhu.com%2Fws%2F0FxTIC" target="_blank">飞猪门店页</a></div>
@@ -2094,6 +2109,95 @@ function scrollToDay(di){
   el.classList.remove('flashday'); void el.offsetWidth; el.classList.add('flashday');
   setTimeout(function(){ el.classList.remove('flashday'); },1200);
 }
+
+/* ============ 一键更新天气：只刷新数字，不替用户改动线 ============ */
+(function(){
+  var LAT=25.038, LNG=102.718, KEY='km2026wxlive';
+  var CURATED='2026-09-29 20:00 中央气象台 / 中国天气网';
+  var DATES=['2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05'];
+  var LB=['10/1','10/2','10/3','10/4','10/5'];
+  var upd=document.getElementById('wxupd'), btn=document.getElementById('wxbtn'), sum=document.getElementById('wxsum');
+  if(!upd||!btn||!sum) return;
+
+  function f1(v){ return (Math.round(v*10)/10).toFixed(1); }
+  function pad(h){ return (h<10?'0':'')+h; }
+
+  function perDay(h){
+    var g={};
+    h.time.forEach(function(t,i){
+      var d=t.slice(0,10); if(!g[d]) g[d]=[];
+      g[d].push([+t.slice(11,13), h.precipitation[i], h.temperature_2m[i]]);
+    });
+    return DATES.map(function(d){
+      var hrs=g[d]; if(!hrs||!hrs.length) return null;
+      var tot=0, tmx=-999, tmn=999;
+      hrs.forEach(function(r){ tot+=r[1]; if(r[2]>tmx) tmx=r[2]; if(r[2]<tmn) tmn=r[2]; });
+      var best={len:0,st:null}, cur=0, st=null;
+      hrs.forEach(function(r){
+        if(r[0]<6||r[0]>21){ cur=0; st=null; return; }
+        if(r[1]<=0.25){ if(st===null) st=r[0]; cur++; if(cur>best.len) best={len:cur,st:st}; }
+        else { cur=0; st=null; }
+      });
+      var peak=hrs.slice().sort(function(a,b){ return b[1]-a[1]; })[0];
+      var heavy=hrs.filter(function(r){ return r[1]>=1.5; }).map(function(r){ return pad(r[0])+'时'; });
+      return {tot:tot, tmx:tmx, tmn:tmn, dry:best, peak:peak, heavy:heavy};
+    });
+  }
+
+  function dayLine(x, lb){
+    if(!x) return '<div class="wxlive gone"><b>'+lb+' 实时</b>：这次预报窗口里没有这一天（已过期或超出 8 天）。</div>';
+    var t=Math.round(x.tmn)+'–'+Math.round(x.tmx)+'℃ · 累计 '+f1(x.tot)+'mm';
+    if(x.dry.len>=3) t+=' · 白天最长干段 <b>'+pad(x.dry.st)+'–'+pad(Math.min(x.dry.st+x.dry.len-1,21))+' 时</b>';
+    if(x.peak&&x.peak[1]>0.25) t+=' · 雨峰 '+pad(x.peak[0])+' 时 '+f1(x.peak[1])+'mm';
+    if(x.heavy.length) t+=' · ≥1.5mm 的时段 '+x.heavy.join(' ');
+    return '<div class="wxlive"><b>'+lb+' 实时</b> · '+t
+      +'<i>这一天的动线是按 '+CURATED+' 排的。数字变了不等于顺序要变——要重排请回来找我，页面不替你改决定。</i></div>';
+  }
+
+  function render(days, saved){
+    LB.forEach(function(lb,i){
+      var sec=document.getElementById('daysec-'+i); if(!sec) return;
+      var old=sec.querySelector('.wxlive'); if(old) old.parentNode.removeChild(old);
+      var strip=sec.querySelector('.wx'); if(!strip) return;
+      strip.insertAdjacentHTML('afterend', dayLine(days[i], lb));
+    });
+    var ok=[];
+    days.forEach(function(x,i){ if(x) ok.push({x:x,i:i}); });
+    if(!ok.length){ sum.innerHTML='实时接口没有返回 10/1–10/5 的任何一天，下面数字未改。'; return; }
+    var wet=ok.slice().sort(function(a,b){ return b.x.tot-a.x.tot; })[0];
+    var cold=ok.slice().sort(function(a,b){ return a.x.tmx-b.x.tmx; })[0];
+    var dry=ok.slice().sort(function(a,b){ return b.x.dry.len-a.x.dry.len; })[0];
+    var age=(Date.now()-saved)/3600000;
+    sum.innerHTML='更新 '+new Date(saved).toLocaleString('zh-CN',{hour12:false})+'（'
+      +(age<1?'刚刚':Math.round(age)+' 小时前')+'）· 雨最多 <b>'+LB[wet.i]+' '+f1(wet.x.tot)+'mm</b>'
+      +' · 白天最凉 <b>'+LB[cold.i]+' '+Math.round(cold.x.tmx)+'℃</b>'
+      +' · 干段最长 <b>'+LB[dry.i]+' '+dry.x.dry.len+' 小时</b>'
+      +'<span class="warn">若这三项和上面写死的天数对不上，说明该重排动线了 → 回来找我</span>';
+  }
+
+  btn.addEventListener('click', function(){
+    btn.disabled=true;
+    sum.textContent='正在拉取实时预报…';
+    var url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LNG
+      +'&hourly=precipitation,temperature_2m&forecast_days=8&timezone=Asia%2FShanghai';
+    fetch(url,{cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(j){
+      if(!j.hourly||!j.hourly.time) throw new Error('返回里没有逐小时数据');
+      var days=perDay(j.hourly), saved=Date.now();
+      try{ localStorage.setItem(KEY, JSON.stringify({days:days, saved:saved})); }catch(e){}
+      render(days, saved);
+    }).catch(function(err){
+      sum.innerHTML='没连上（'+String(err&&err.message||err)+'）。这个接口要能直连 api.open-meteo.com；拉不到时页面原有数字一字未动。';
+    }).then(function(){ btn.disabled=false; });
+  });
+
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){ var o=JSON.parse(raw); if(o&&o.days) render(o.days, o.saved); }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
