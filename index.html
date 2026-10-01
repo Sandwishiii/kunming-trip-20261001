@@ -969,6 +969,7 @@ body{overflow:hidden;background:var(--bg)}
 .mchip.b{border-color:#7fb8e6;color:#0b5c99;background:#eff6ff}
 .mchip.n{border-color:#b9a5e0;color:#5b21b6;background:#f5f3ff}
 .mchip.g{border-color:#8fd4a8;color:#166534;background:#f0fdf4}
+.mchip.te{border-color:#f0a6cd;color:#c2185b;background:#fff0f7}
 .leaflet-popup-content{font-size:12.5px;line-height:1.65;margin:10px 12px}
 .leaflet-popup-content b{font-size:13.5px}
 .pp-tag{display:inline-block;font-size:10px;color:#fff;border-radius:8px;padding:0 6px;margin-bottom:3px}
@@ -1097,7 +1098,7 @@ body{overflow:hidden;background:var(--bg)}
   <!-- ============ 第 2 页：美食 ============ -->
   <section class="page" id="pg-food"><div class="pgwrap"><div class="inner">
     <h2>🍜 美食 · 102 家店</h2>
-    <p class="small" style="margin:-4px 0 10px">每张贴了餐别标签：<span class="mchip b">早餐</span> 早点铺（米线/饵块，上午吃） ｜ <span class="mchip">正餐</span> 午/晚餐（米线正餐、滇菜、菌火锅） ｜ <span class="mchip n">夜宵</span> 烧烤/鸡脚（晚上 9 点后） ｜ <span class="mchip g">街区·市场</span> 随吃随逛。地图页顶部同样可按餐别筛选。</p>
+    <p class="small" style="margin:-4px 0 10px">每张贴了餐别标签：<span class="mchip b">早餐</span> 早点铺（米线/饵块，上午吃） ｜ <span class="mchip">正餐</span> 午/晚餐（米线正餐、滇菜、菌火锅） ｜ <span class="mchip n">夜宵</span> 烧烤/鸡脚（晚上 9 点后） ｜ <span class="mchip g">街区·市场</span> 随吃随逛。地图页顶部同样可按餐别筛选。<b>但「🧋 奶茶」不在这套餐别体系里</b>（2026-10-01 晚按你的反馈改的）：这 15 家只认类目、不占餐别，点<b>早餐／正餐／夜宵／街区·市场</b>四个按钮时都不会出现，只在<b>全部</b>和<b>🧋 奶茶</b>两个按钮下显示；图上它们的小标签也换成<b>玫红描边</b>（标签文字仍是店名，和绿标的「街区·市场」、蓝标的「早餐」同一套配色区分）。</p>
     <p class="lead">店铺<b>逐条标注小红书来源笔记、作者与发布日期</b>（多为 2026 年 5–9 月）。这些是别人的口味证据、不是我的验证——出发前用每张卡上的「高德搜店名」确认在营业。觅食三规矩：早餐交给小锅米线/烧饵块/豆花米线；正餐看汽锅鸡+菌子+滇菜小炒；下午零嘴是破酥包/官渡粑粑/泡鲁达。<b>另有 5 家为飞猪 AI 路书补充</b>（云南盛翠湖店、桥香园南屏店、湖景坊海埂店、爱尚菌老街店、菌彩 1903 店），<b>32 个新点位为本地口碑榜单与高德周边实查补充</b>（野生菌火锅 9 家 + 砂锅/铜锅/罐罐米线 9 家 + 东华农贸市场 + 火车北站片区烧烤带 8 家 + <b>你点名的 5 家</b>），来源行标"本地口碑榜单交叉"、"高德周边实查"或"高德门店详情逐个实查（2026-09-27）"，全部逐家高德实查。</p>
     <h3>米线 · 饵丝 · 早点（老昆明的精髓，别在酒店吃自助）</h3>
     <div class="grid g2" id="gridNoodle"></div>
@@ -1621,7 +1622,7 @@ function geoBar(){
     '<br>圈＝<b>直线 1 公里</b>（不是步行距离；昆明多坡与围挡，走路我按 1.2–1.5 倍估，这个倍数是估的、没逐条实测）'+
     '<br>圈内「美食 + 奶茶」共 <b>'+near.length+'</b> 个钉：<b>正餐 '+cnt['正餐']+'</b> · 早餐 '+cnt['早']+' · 夜宵 '+cnt['夜宵']+
     ' · 全天/街区 '+cnt['全天']+' · 奶茶 '+tea+(other?(' · 其它（没标餐别） '+other):'')+
-    '。<span style="color:#5b6b7c">分项相加＝总数；「全天/街区」里含 5 个街区锚点（片区不是门店）；计数始终数全部美食 + 奶茶钉，不受顶部筛选影响'+
+    '。<span style="color:#5b6b7c">分项相加＝总数；奶茶单列一项、不占「全天/街区」桶（2026-10-01 晚改的），该桶全图 18 个钉里有 4 个是街区锚点（片区不是门店，第 5 个巡津街挂在夜宵里）；计数始终数全部美食 + 奶茶钉，不受顶部筛选影响'+
     (estN?('；其中有 '+estN+' 个钉是「坐标为示意」的，距离按示意坐标量'):'')+'。</span>';
   const list=document.createElement('div'); list.className='melist';
   if(!near.length){ const s=document.createElement('span');
@@ -1933,7 +1934,9 @@ function glink(kw){return 'https://uri.amap.com/search?keyword='+encodeURICompon
 const MPIN={'童菲小锅米线 · 端仕小锅 · 豆香园':'端仕小锅','味到豆花米线 / 跃情饵块':'味到豆花米线','利口福酒家 / 快乐家餐':'利口福酒家','木水花野生菌交易中心 · 自采代加工':'木水花野生菌交易中心'};
 const MEALOF={}; POINTS.forEach(p=>{ if((p.c==='food'||p.c==='tea')&&p.meal) MEALOF[p.n]=p.meal; });
 const MCHIP={'早':['b','早餐'],'正餐':['','正餐'],'夜宵':['n','夜宵'],'全天':['g','街区·市场']};
-function mealChip(mn){ const m=MCHIP[MEALOF[mn]||'']; return m?'<span class="mchip '+m[0]+'">'+m[1]+'</span>':''; }
+const TEAOF={}; POINTS.forEach(p=>{ if(p.c==='tea') TEAOF[p.n]=1; });
+function mealChip(mn){ if(TEAOF[mn]) return '<span class="mchip te">🧋 奶茶</span>';
+  const m=MCHIP[MEALOF[mn]||'']; return m?'<span class="mchip '+m[0]+'">'+m[1]+'</span>':''; }
 function shopHTML(s){
   const pn=MPIN[s.n]||s.n, onMap=POINTS.some(p=>p.n===pn);
   return '<div class="shop"><div class="sn">'+s.n+mealChip(pn)+' <span class="small">'+(s.cat||'')+'</span></div>'+
