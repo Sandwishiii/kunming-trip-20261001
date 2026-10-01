@@ -892,6 +892,8 @@ body{overflow:hidden;background:var(--bg)}
 .tbtn.sub{border-style:dashed}
 .tbtn[data-k=gift].active{background:#8e24aa}
 .tbtn[data-k=air].active{background:#455a64}
+#toolbar .tbtn.geo{border-color:#a8c7ec;color:#0b5c99;background:#f4f9ff}
+#toolbar .tbtn.geo.active{background:#1565c0;color:#fff;border-color:transparent}
 #mapmain{flex:1;display:flex;min-height:0}
 #sidebar{width:390px;flex:none;overflow-y:auto;background:var(--card);border-right:1px solid #e3e9f0;padding:12px}
 #map{flex:1;min-width:0}
@@ -953,6 +955,15 @@ body{overflow:hidden;background:var(--bg)}
 .mkbox .lbl.g{border-color:#8fd4a8;color:#166534}
 .mkbox .lbl i.num{font-style:normal;display:inline-block;min-width:13px;height:13px;line-height:13px;text-align:center;border-radius:50%;background:#1a66d0;color:#fff;font-size:9px;font-weight:800;margin-right:4px}
 .mkbox .lbl.only{border-color:#1a66d0;color:#1a66d0}
+.mkbox .medot{display:inline-block;width:15px;height:15px;border-radius:50%;background:#1565c0;border:3px solid #fff;box-shadow:0 0 0 2px rgba(21,101,192,.5),0 1px 4px rgba(0,0,0,.45)}
+.mkbox .lbl.me{border-color:#1565c0;color:#0f3f7a;background:#fff;max-width:none}
+#geobar{display:none;position:absolute;z-index:820;right:10px;bottom:26px;max-width:min(92vw,346px);background:rgba(255,255,255,.96);border:1px solid #a8c7ec;border-left:4px solid #1565c0;border-radius:12px;padding:8px 11px;font-size:11.5px;line-height:1.6;color:#243447;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+#geobar b{color:#0f3f7a}
+#geobar .melist{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+#geobar .melist a{font-size:11px;background:#eef4fb;border:1px solid #c9dcf2;color:#0b5c99;border-radius:10px;padding:1px 7px;text-decoration:none;white-space:nowrap}
+#geobar .melist span{font-size:11px;color:#5b6b7c}
+#geobar .meact{margin-top:5px;display:flex;gap:10px}
+#geobar .meact a{font-size:11px;color:#1565c0;text-decoration:underline;cursor:pointer}
 .mchip{display:inline-block;font-size:10.5px;border-radius:8px;padding:0 7px;margin-left:5px;vertical-align:1px;border:1px solid #f0b27a;color:#9a3412;background:#fff7ed}
 .mchip.b{border-color:#7fb8e6;color:#0b5c99;background:#eff6ff}
 .mchip.n{border-color:#b9a5e0;color:#5b21b6;background:#f5f3ff}
@@ -1049,8 +1060,12 @@ body{overflow:hidden;background:var(--bg)}
       <span class="tbtn" data-k="tea">🧋 奶茶</span>
       <span class="tbtn" data-k="gift">🎁 伴手礼</span>
       <span class="tbtn" data-k="air">✈️ 机场圈</span>
+      <span class="tbtn geo" id="geobtn" title="向浏览器要一次定位，在你周围画半径 1 公里的圈并数圈内的店">📍 我的位置</span>
+      <span class="tbtn geo" id="geopickbtn" title="浏览器不给定位时，手动在地图上点一下自己在哪">🎯 手动选点</span>
+      <span class="tbtn geo" id="geofbtn" style="display:none" title="只显示 1 公里圈内的美食 / 奶茶钉">🔍 只看圈内</span>
     </div>
     <div id="seqtip" style="display:none;position:absolute;z-index:800;top:52px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border:1px solid #cbd5e1;border-radius:14px;padding:3px 12px;font-size:11.5px;color:#33475b;box-shadow:0 2px 8px rgba(0,0,0,.12);pointer-events:none;white-space:normal;max-width:88vw;text-align:center">钉上蓝圈数字 = 当天游览顺序（按行程时间），虚线为走线参考</div>
+    <div id="geobar"></div>
     <div id="mapmain">
       <div id="sidebar">
         <div class="wxupd" id="wxupd">
@@ -1166,7 +1181,7 @@ body{overflow:hidden;background:var(--bg)}
     <div class="card">
       <p class="small" style="margin:0 0 6px"><b>Fly.ai 实查：</b>酒店每晚价/装修年份/坐标、石林门票 ¥129、机场酒店接送规则、景点预订入口与开放时间。<b>小红书笔记正文（已登录抓取）：</b>美食 24 家与伴手礼价目，来源逐条标注；另有 5 家美食补充自<b>飞猪 AI 路书</b>（2026-09 生成）。</p>
       <p class="small" style="margin:0 0 6px"><b>接口未给、我没编：</b>西山/龙门/民族村门票价（price 返回 null）；石林直通车时刻与票价；地铁完整首末班（取公开第三方）；云南映象票价档 198/270/360/468 来自公开票务页。所有酒店 score 恒为 null，排序只能按位置+装修年份。</p>
-      <p class="small" style="margin:0"><b>地图坐标：</b>景点/酒店为接口返回的 GCJ-02 精确坐标；<b>102 家餐厅/茶饮（图上 121 个钉，一个品牌可以多店上钉；这 121 个钉分成两个类目：美食 106 个 / 奶茶 15 个，按店牌去重是 94 家 / 8 家。<b>但按地图顶部的类目按钮数出来，「🍜 美食」是 111 个钉而不是 106 个</b>——多出的 5 个是本来就在美食类目里的<b>街区锚点</b>（南屏步行街、翠湖文林街咖啡带、大观篆新农贸市场、官渡古镇小吃带、巡津街），它们是片区不是门店，不进 102 家的计数；按餐别筛时它们要算进去，所以四个餐别按钮的实际钉数是<b>早 16、正餐 62、夜宵 15（14 家店 + 巡津街锚点）、街区·市场 33（15 个奶茶钉 + 14 个美食门店钉 + 4 个街区锚点）</b>，合计 126 = 美食 111 + 奶茶 15。+ 13 家伴手礼门店已逐家用高德开放平台 POI 检索核实</b>（2026-09-25；<b>奶茶三路 15 家为 2026-10-01 逐家实查</b>；“你点名的 5 家”为 2026-09-27 补查；<b>富源猪脚火锅为 2026-09-30 为 10/1 那晚补查</b>），评分/人均/营业时间取自高德，按钮可直接导航；餐厅中仅 3 家（滇味菜馆、跃情饵块、建水鸡脚王·巡津街）在高德查不到同名门店，弹层仍标"<b>坐标为示意</b>"、按钮为高德搜店名。多店品牌一般钉在离行程最近的那家店（这次新加的临江里、邱记、淮涛各钉了两家分店做对比），出发前可在高德再选分店。底图：高德瓦片 + Leaflet 1.9.4（已内联，离线可用，瓦片需联网）。<b>口径说明（2026-09-30）：</b>这里原来写 64，是照着侧栏卡片数填的手数；这次把 8 个品牌的酸菜牛肉与傣味烧烤（临江里、二姐、婧语、邱记、淮涛、张姐、火上云小南、临沧新大陆）共 11 个钉加到地图上后，改成<b>按高德的店牌登记名去重</b>统计（临江里和它的清真分店在店牌上是两个登记名，所以 8 个品牌数出 9 条），所以数字会跳。这 8 个品牌<b>只上图、没做侧栏卡片</b>；其中张姐海伦堡店、邱记西秀园店、淮涛关上店三家标成"每天都显示但不排进任何一天"。<b>口径说明（2026-10-01）：</b>奶茶这一轮加的是 8 个品牌（上山喝茶、山山茶茶、柠气云南茶、俏珠妹·煲甄珠、刘闻山、海趣奶茶、迪庆萨玛阁酥油茶馆、三锅庄）共 15 个钉，仍按“高德店牌登记名去重”计数，所以 79→87、88→103；其中 <b>5</b> 个钉（山山茶茶同德广场店、刘闻山近华浦路店、海趣奶茶、两家酥油茶）标成<b>不排进任何一天</b>，另外有 2 家（刘闻山塘双路店、藏族体验香巴拉酥油茶）只写在卡片文字里、<b>没上钉也没做卡片</b>。<b>类目变动（2026-10-01）：</b>应“奶茶单独开一个钉”这句话，地图上把那 15 个奶茶钉从「美食」里分出来单成「🧋 奶茶」类目——顶部多一个玫红按钮，点它只看这 15 个钉；点「🍜 美食」时它们不再出现。按餐别的子筛选照旧对奶茶生效（这 15 个钉的餐别都标着「街区·市场」）。<b>象子茶铺 6 家与酸奶 / 牛油果 5 家这次留在美食类目里，没有跟着搬。</b><b>口径说明（2026-10-01 下午）：</b>又并进来一批<b>抖音个人榜单截图</b>里识别的店——截图上有 15 个招牌名，其中"上山喝茶"上一轮已在「🧋 奶茶」类目、<b>没有重复上钉</b>，剩下 14 家加上你口头点的"旮沓食堂"（高德登记名"旮旯食堂"）共 <b>15 个招牌名 / 18 个钉</b>（太小食堂、晨曦豆花米线、旮旯食堂各钉两家分店），仍按"高德店牌登记名去重"计数，所以 87→102 家、103→121 钉、类目按钮 108→126、全图 146→164。<b>这一批只上地图钉 + 美食页一段说明，没做逐家侧栏卡片</b>（与 2026-09-30 那批酸菜牛肉 / 傣味烧烤同样处理）。整理：Qoder · 2026-09-25。</p>
+      <p class="small" style="margin:0"><b>地图坐标：</b>景点/酒店为接口返回的 GCJ-02 精确坐标；<b>102 家餐厅/茶饮（图上 121 个钉，一个品牌可以多店上钉；这 121 个钉分成两个类目：美食 106 个 / 奶茶 15 个，按店牌去重是 94 家 / 8 家。<b>但按地图顶部的类目按钮数出来，「🍜 美食」是 111 个钉而不是 106 个</b>——多出的 5 个是本来就在美食类目里的<b>街区锚点</b>（南屏步行街、翠湖文林街咖啡带、大观篆新农贸市场、官渡古镇小吃带、巡津街），它们是片区不是门店，不进 102 家的计数；按餐别筛时它们要算进去，所以四个餐别按钮的实际钉数是<b>早 16、正餐 62、夜宵 15（14 家店 + 巡津街锚点）、街区·市场 33（15 个奶茶钉 + 14 个美食门店钉 + 4 个街区锚点）</b>，合计 126 = 美食 111 + 奶茶 15。+ 13 家伴手礼门店已逐家用高德开放平台 POI 检索核实</b>（2026-09-25；<b>奶茶三路 15 家为 2026-10-01 逐家实查</b>；“你点名的 5 家”为 2026-09-27 补查；<b>富源猪脚火锅为 2026-09-30 为 10/1 那晚补查</b>），评分/人均/营业时间取自高德，按钮可直接导航；餐厅中仅 3 家（滇味菜馆、跃情饵块、建水鸡脚王·巡津街）在高德查不到同名门店，弹层仍标"<b>坐标为示意</b>"、按钮为高德搜店名。多店品牌一般钉在离行程最近的那家店（这次新加的临江里、邱记、淮涛各钉了两家分店做对比），出发前可在高德再选分店。底图：高德瓦片 + Leaflet 1.9.4（已内联，离线可用，瓦片需联网）。<b>「📍 我的位置」口径（2026-10-01 加）：</b>点顶栏那个按钮，由<b>你自己的浏览器</b>授权定位，<b>坐标只在页面里算，不上传、不保存到任何服务器</b>；浏览器返回的是 WGS-84，本页底图与所有钉是 GCJ-02，代码里做了标准偏移转换再画圈——<b>不转换在昆明城区会整体漂约 360 米</b>（这个数就是本页同一算法量出来的，另用北京公开基准点校过）。圈是<b>以你为圆心的直线 1 公里</b>（不是步行距离；昆明多坡与围挡，走路我按 1.2–1.5 倍估，<b>这个倍数是估的、没有逐条实测</b>），圈内的家数把 5 个街区锚点也一起数（片区不是门店），且<b>始终数全部美食 / 奶茶钉、不跟着顶部筛选变</b>。浏览器给的 ±米数是 GPS 精度半径（室内与高楼边通常 20–100 米），<b>圈边缘那两三家的判定本身就在误差里</b>；另有 3 家"坐标为示意"的店按示意坐标量距离。<b>实测过的失败形态：</b>本机 Chrome 以双击打开的 file:// 页面调定位，返回的是“权限被拒”（错误码 1，不弹授权窗），线上 https 地址才会走系统授权——所以页面备了「🎯 手动选点」：在地图空白处点一下你在哪，画圈与数店完全同样板（点在店钉上会先开那家店的弹层，不算定位）。<b>口径说明（2026-09-30）：</b>这里原来写 64，是照着侧栏卡片数填的手数；这次把 8 个品牌的酸菜牛肉与傣味烧烤（临江里、二姐、婧语、邱记、淮涛、张姐、火上云小南、临沧新大陆）共 11 个钉加到地图上后，改成<b>按高德的店牌登记名去重</b>统计（临江里和它的清真分店在店牌上是两个登记名，所以 8 个品牌数出 9 条），所以数字会跳。这 8 个品牌<b>只上图、没做侧栏卡片</b>；其中张姐海伦堡店、邱记西秀园店、淮涛关上店三家标成"每天都显示但不排进任何一天"。<b>口径说明（2026-10-01）：</b>奶茶这一轮加的是 8 个品牌（上山喝茶、山山茶茶、柠气云南茶、俏珠妹·煲甄珠、刘闻山、海趣奶茶、迪庆萨玛阁酥油茶馆、三锅庄）共 15 个钉，仍按“高德店牌登记名去重”计数，所以 79→87、88→103；其中 <b>5</b> 个钉（山山茶茶同德广场店、刘闻山近华浦路店、海趣奶茶、两家酥油茶）标成<b>不排进任何一天</b>，另外有 2 家（刘闻山塘双路店、藏族体验香巴拉酥油茶）只写在卡片文字里、<b>没上钉也没做卡片</b>。<b>类目变动（2026-10-01）：</b>应“奶茶单独开一个钉”这句话，地图上把那 15 个奶茶钉从「美食」里分出来单成「🧋 奶茶」类目——顶部多一个玫红按钮，点它只看这 15 个钉；点「🍜 美食」时它们不再出现。按餐别的子筛选照旧对奶茶生效（这 15 个钉的餐别都标着「街区·市场」）。<b>象子茶铺 6 家与酸奶 / 牛油果 5 家这次留在美食类目里，没有跟着搬。</b><b>口径说明（2026-10-01 下午）：</b>又并进来一批<b>抖音个人榜单截图</b>里识别的店——截图上有 15 个招牌名，其中"上山喝茶"上一轮已在「🧋 奶茶」类目、<b>没有重复上钉</b>，剩下 14 家加上你口头点的"旮沓食堂"（高德登记名"旮旯食堂"）共 <b>15 个招牌名 / 18 个钉</b>（太小食堂、晨曦豆花米线、旮旯食堂各钉两家分店），仍按"高德店牌登记名去重"计数，所以 87→102 家、103→121 钉、类目按钮 108→126、全图 146→164。<b>这一批只上地图钉 + 美食页一段说明，没做逐家侧栏卡片</b>（与 2026-09-30 那批酸菜牛肉 / 傣味烧烤同样处理）。整理：Qoder · 2026-09-25。</p>
     </div>
   </div></div></section>
 
@@ -1566,6 +1581,113 @@ L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scal
 }).addTo(map);
 map.on('click',()=>map.scrollWheelZoom.enable());
 
+/* ===== 📍 我的位置（2026-10-01 加）：浏览器定位 → 蓝点 + 半径 1 公里半透明蓝圈 → 数圈内的店 =====
+   口径三条，都是实话：① 坐标只在你的浏览器里算，页面不上传、不保存到任何服务器；
+   ② 浏览器给的是 WGS-84（GPS 原始坐标），本页底图与全部钉是 GCJ-02，昆明城区两者差约 360 米（全国普遍是几百米量级），
+      所以下面先做标准偏移转换再画圈；③ 圈是"以你为圆心的直线 1 公里"，不是步行距离。 */
+const GEO_R=1000;
+const GEOF={on:false,ll:null,acc:0,src:'',pick:false,mk:null,ring:null,accr:null};
+const GCJ_A=6378245.0, GCJ_EE=0.008068936288017845;
+function gcjTLat(x,y){ let r=-100.0+2.0*x+3.0*y+0.2*y*y+0.1*x*y+0.2*Math.sqrt(Math.abs(x));
+  r+=(20.0*Math.sin(6.0*x*Math.PI)+20.0*Math.sin(2.0*x*Math.PI))*2.0/3.0;
+  r+=(20.0*Math.sin(y*Math.PI)+40.0*Math.sin(y/3.0*Math.PI))*2.0/3.0;
+  r+=(160.0*Math.sin(y/12.0*Math.PI)+320.0*Math.sin(y*Math.PI/30.0))*2.0/3.0; return r; }
+function gcjTLng(x,y){ let r=300.0+x+2.0*y+0.1*x*x+0.1*x*y+0.1*Math.sqrt(Math.abs(x));
+  r+=(20.0*Math.sin(6.0*x*Math.PI)+20.0*Math.sin(2.0*x*Math.PI))*2.0/3.0;
+  r+=(20.0*Math.sin(x*Math.PI)+40.0*Math.sin(x/3.0*Math.PI))*2.0/3.0;
+  r+=(150.0*Math.sin(x/12.0*Math.PI)+300.0*Math.sin(x/30.0*Math.PI))*2.0/3.0; return r; }
+function wgs2gcj(lat,lng){ let dLat=gcjTLat(lng-105.0,lat-35.0), dLng=gcjTLng(lng-105.0,lat-35.0);
+  const radLat=lat/180.0*Math.PI, ms=Math.sin(radLat);
+  const magic=1.0-GCJ_EE*ms*ms, sm=Math.sqrt(magic);            // 参考椭球子午圈/卯酉圈系数
+  dLat=(dLat*180.0)/((GCJ_A*(1.0-GCJ_EE))/(magic*sm)*Math.PI);
+  dLng=(dLng*180.0)/(GCJ_A/sm*Math.cos(radLat)*Math.PI);
+  return [lat+dLat,lng+dLng]; }
+function geoFmt(d){ return d<1000?(Math.round(d)+' 米'):(d/1000).toFixed(2)+' 公里'; }
+function geoBounds(){ const dl=GEO_R/110574.0, dg=GEO_R/(111320.0*Math.cos(GEOF.ll.lat*Math.PI/180));
+  return L.latLngBounds([[GEOF.ll.lat-dl,GEOF.ll.lng-dg],[GEOF.ll.lat+dl,GEOF.ll.lng+dg]]); }
+function geoNear(){ const a=[]; if(!GEOF.ll) return a; POINTS.forEach(p=>{ if(p.c!=='food'&&p.c!=='tea') return;
+    const d=L.latLng(p.lat,p.lng).distanceTo(GEOF.ll); if(d<=GEO_R) a.push({p:p,d:d}); });
+  a.sort((x,y)=>x.d-y.d); return a; }
+function geoCurK(){ const b=document.querySelector('.tbtn.active'); return (b&&b.dataset.k)?b.dataset.k:'all'; }
+function geoMsg(t){ const el=document.getElementById('geobar'); if(!el) return; el.innerHTML='<b>📍 我的位置</b><br>'+t; el.style.display='block'; }
+function geoBar(){
+  const el=document.getElementById('geobar'); if(!el||!GEOF.ll) return;
+  const near=geoNear(), cnt={'早':0,'正餐':0,'夜宵':0,'全天':0}; let tea=0, estN=0;
+  near.forEach(o=>{ if(o.p.c==='tea'){ tea++; } else if(o.p.meal&&cnt[o.p.meal]!==undefined){ cnt[o.p.meal]++; }
+    if(o.p.est) estN++; });
+  const tot=cnt['早']+cnt['正餐']+cnt['夜宵']+cnt['全天']+tea, other=near.length-tot;
+  el.innerHTML='<b>📍 我的位置</b> · '+GEOF.src+(GEOF.acc?' · GPS 精度约 ±'+Math.round(GEOF.acc)+' 米':'')+
+    '<br>圈＝<b>直线 1 公里</b>（不是步行距离；昆明多坡与围挡，走路我按 1.2–1.5 倍估，这个倍数是估的、没逐条实测）'+
+    '<br>圈内「美食 + 奶茶」共 <b>'+near.length+'</b> 个钉：<b>正餐 '+cnt['正餐']+'</b> · 早餐 '+cnt['早']+' · 夜宵 '+cnt['夜宵']+
+    ' · 全天/街区 '+cnt['全天']+' · 奶茶 '+tea+(other?(' · 其它（没标餐别） '+other):'')+
+    '。<span style="color:#5b6b7c">分项相加＝总数；「全天/街区」里含 5 个街区锚点（片区不是门店）；计数始终数全部美食 + 奶茶钉，不受顶部筛选影响'+
+    (estN?('；其中有 '+estN+' 个钉是「坐标为示意」的，距离按示意坐标量'):'')+'。</span>';
+  const list=document.createElement('div'); list.className='melist';
+  if(!near.length){ const s=document.createElement('span');
+    s.textContent='1 公里圈内没有美食 / 奶茶钉。最近的都在圈外，点顶部「🍜 美食」看全图。'; list.appendChild(s); }
+  near.slice(0,8).forEach(o=>{ const a=document.createElement('a'); a.href='javascript:void(0)';
+    a.textContent=(o.p.c==='tea'?'🧋 ':'🍜 ')+shortName(o.p.n)+' · '+geoFmt(o.d);
+    a.onclick=function(){ focusPin(o.p.n); }; list.appendChild(a); });
+  el.appendChild(list);
+  const act=document.createElement('div'); act.className='meact';
+  const r1=document.createElement('a'); r1.href='javascript:void(0)'; r1.textContent='重新定位'; r1.onclick=function(){ geoAsk(); };
+  const r2=document.createElement('a'); r2.href='javascript:void(0)'; r2.textContent='清除我的位置'; r2.onclick=function(){ geoClear(); };
+  act.appendChild(r1); act.appendChild(r2); el.appendChild(act);
+}
+function geoPlace(lat,lng,acc,srcName){
+  const g=wgs2gcj(lat,lng); GEOF.ll=L.latLng(g[0],g[1]); GEOF.acc=acc||0; GEOF.src=srcName;
+  ['mk','ring','accr'].forEach(k=>{ if(GEOF[k]){ map.removeLayer(GEOF[k]); GEOF[k]=null; } });
+  GEOF.ring=L.circle(GEOF.ll,{radius:GEO_R,color:'#1565c0',weight:2,opacity:.9,fillColor:'#1565c0',fillOpacity:.15,bubblingMouseEvents:true})
+    .addTo(map).bindPopup('<b>以你为圆心的直线 1 公里</b><br>这是直线半径，不是步行距离；昆明多坡与围挡，走路按 1.2–1.5 倍估（估的）。圈外的店并没有不能去，只是要打车。<br><span style="color:#5b6b7c">坐标已由页面内代码从 WGS-84 转成 GCJ-02，与高德底图对齐；你的坐标不上传、不保存。</span>',{maxWidth:250});
+  if(GEOF.acc>8) GEOF.accr=L.circle(GEOF.ll,{radius:GEOF.acc,color:'#1565c0',weight:1,opacity:.5,dashArray:'4 6',fill:false,bubblingMouseEvents:true})
+    .addTo(map).bindPopup('<b>GPS 精度半径 ±'+Math.round(GEOF.acc)+' 米</b><br>浏览器只敢说准到这个虚线圈；室内与高楼边通常 20–100 米，所以圈边缘那两三家的判定本身就在误差里。',{maxWidth:250});
+  GEOF.mk=L.marker(GEOF.ll,{zIndexOffset:1200,icon:L.divIcon({className:'',iconSize:[0,0],popupAnchor:[0,-10],
+    html:'<div class="mkbox"><span class="medot"></span><div class="lbl me">我的位置</div></div>'})})
+    .addTo(map).bindPopup('<b>📍 我的位置</b><br>'+srcName+(GEOF.acc?' · 精度约 ±'+Math.round(GEOF.acc)+' 米':'')+
+      '<br><span style="color:#5b6b7c">圈与距离都以此点为圆心；这是直线半径。</span>',{maxWidth:250});
+  const fb=document.getElementById('geofbtn'); if(fb) fb.style.display='';
+  map.fitBounds(geoBounds().pad(.15),{maxZoom:15});
+  geoBar();
+}
+function geoClear(){
+  ['mk','ring','accr'].forEach(k=>{ if(GEOF[k]){ map.removeLayer(GEOF[k]); GEOF[k]=null; } });
+  GEOF.ll=null; GEOF.on=false; GEOF.pick=false;
+  const b=document.getElementById('geofbtn'); if(b){ b.style.display='none'; b.classList.remove('active'); }
+  const p=document.getElementById('geopickbtn'); if(p) p.classList.remove('active');
+  const el=document.getElementById('geobar'); if(el) el.style.display='none';
+  refresh(geoCurK());
+}
+function geoToggle(){
+  if(!GEOF.ll){ geoMsg('先点顶部「📍 我的位置」（或「🎯 手动选点」）定好你在哪，才能只看圈内。'); return; }
+  GEOF.on=!GEOF.on; const b=document.getElementById('geofbtn'); if(b) b.classList.toggle('active',GEOF.on);
+  refresh(geoCurK());
+}
+function geoAsk(){
+  if(!navigator.geolocation){ geoMsg('这个浏览器没有定位接口（navigator.geolocation 不存在）。请改用「🎯 手动选点」，或换 Chrome / Edge 打开线上地址。'); return; }
+  if(!window.isSecureContext){ geoMsg('这个来源不是安全上下文（http:// 打开或被嵌进别的页面时浏览器根本不给定位权限）。请改用 https 的线上地址，或点「🎯 手动选点」在图上点一下你在哪。'); return; }
+  const b=document.getElementById('geobtn'); if(b) b.textContent='📍 定位中…';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    if(b) b.textContent='📍 我的位置';
+    geoPlace(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy,'浏览器定位（系统 GPS / Wi-Fi 给出）');
+  },function(err){
+    if(b) b.textContent='📍 我的位置';
+    const m={1:'定位权限被拒（错误码 1）。本机实测：双击打开的 file:// 页面，Chrome 直接判拒、连授权窗都不弹——这种打开方式请改用「🎯 手动选点」，或打开线上地址后在地址栏把定位权限设为允许。',
+             2:'系统现在取不到位置（GPS 关着、或离线时网络定位不可用）。改用「🎯 手动选点」。',
+             3:'定位超时（12 秒没回）。到开阔处再点一次，或改用「🎯 手动选点」。'};
+    geoMsg(m[err.code]||('定位失败：'+err.message));
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+}
+map.on('click',function(e){ if(!GEOF.pick) return; GEOF.pick=false;
+  const p=document.getElementById('geopickbtn'); if(p) p.classList.remove('active');
+  geoPlace(e.latlng.lat,e.latlng.lng,0,'手动在图上点的（误差取决于你点得多准）'); });
+(function(){
+  const g=document.getElementById('geobtn'); if(g) g.addEventListener('click',function(){ geoAsk(); });
+  const f=document.getElementById('geofbtn'); if(f) f.addEventListener('click',function(){ geoToggle(); });
+  const p=document.getElementById('geopickbtn'); if(p) p.addEventListener('click',function(){
+    GEOF.pick=!GEOF.pick; p.classList.toggle('active',GEOF.pick);
+    if(GEOF.pick) geoMsg('现在<b>在地图空白处点一下你现在所在的位置</b>（饭馆门口、酒店大堂都行），我就以那个点画 1 公里圈并数圈内的店。<b>点在店钉上会先打开那家店的弹层，不算定位</b>；再点一次「🎯 手动选点」取消。'); });
+})();
+
 function amapLink(lat,lng,name,est){
   return est? 'https://uri.amap.com/search?keyword='+encodeURIComponent(name+' 昆明')+'&city=%E6%98%86%E6%98%8E&coordinate=gaode&callnative=1'
             : 'https://uri.amap.com/marker?position='+lng+','+lat+'&name='+encodeURIComponent(name)+'&src=qoderplan&coordinate=gaode&callnative=1';
@@ -1703,15 +1825,18 @@ function refresh(k){
     else if(mealK) show=(p.c==='food'||p.c==='tea')&&p.meal===mealK;
     else if(k==='air') show=(p.c==='hub')||(p.c==='hotel'&&p.d&&p.d.indexOf(0)>=0);
     else if(dayIdx!==undefined) show=dayVisible(p,dayIdx,sq);
+    if(show&&GEOF.on&&GEOF.ll) show=L.latLng(p.lat,p.lng).distanceTo(GEOF.ll)<=GEO_R;
     if(show){ mk.addTo(map); vis.push([p.lat,p.lng]); }
   });
   if(dayIdx!==undefined){ const sq=daySeq(dayIdx); numPins(numMapFor(dayIdx,sq)); routeLayers=drawRoute(dayIdx); const rp=(ROUTES[dayIdx]||[]).map(n=>{const q=POINTS.find(p=>p.n===n);return q?[q.lat,q.lng]:null;}).filter(Boolean); Array.prototype.push.apply(vis,rp); }
-  if(vis.length>1) map.fitBounds(L.latLngBounds(vis).pad(.2),{maxZoom:k==='air'?13:15});
+  if(GEOF.on&&GEOF.ll){ map.fitBounds(geoBounds().pad(.15),{maxZoom:15}); }
+  else if(vis.length>1) map.fitBounds(L.latLngBounds(vis).pad(.2),{maxZoom:k==='air'?13:15});
   else if(vis.length===1) map.setView(vis[0],14);
   else map.setView([25.02,102.72],11);
 }
 document.querySelectorAll('.tbtn').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  if(!b.dataset.k) return; // 定位那三个按钮（📍/🎯/🔍）没有 data-k，不参与筛选重画
+  document.querySelectorAll('.tbtn[data-k]').forEach(x=>x.classList.remove('active')); b.classList.add('active');
   const st=document.getElementById('seqtip'); if(st) st.style.display=/^d[123]$/.test(b.dataset.k)?'':'none';
   refresh(b.dataset.k);
   const di={d1:1,d2:2,d3:3}[b.dataset.k]; if(di!==undefined) scrollToDay(di);
